@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db123:
+    image: postgres:latest
+    ports:
+      - '6060:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=varzeshsoft
+    restart: on-failure
+  redisserver123:
+    image: redis:latest
+    ports:
+      - '7078:6379'
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: sql_server
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Atena123bagheri  
+      - MSSQL_TCP_PORT=1433
+      - MSSQL_TLS_CERT=/var/opt/mssql/mssql.pem
+      - MSSQL_TLS_KEY=/var/opt/mssql/mssql.pem
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+      - ./mssql.pem:/var/opt/mssql/mssql.pem
+
+volumes:
+  sql_data:

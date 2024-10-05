@@ -1,0 +1,52 @@
+variables:
+  DEVELOP_PATH: /home/gitlab-runner/varzeshsoft/develop/app
+  MASTER_PATH: /home/gitlab-runner/varzeshsoft/master/app
+  ECOSYSTEM_DEVELOP_NAME: varzeshsoft-develop
+  ECOSYSTEM_MASTER_NAME: varzeshsoft-master
+stages:
+  - develop
+  - master
+build_develop:
+  stage: develop
+  image: alpine
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "develop"'
+  script:
+    - sudo rm -rf $DEVELOP_PATH/*
+    - sudo cp -R ./* $DEVELOP_PATH
+    - cd $DEVELOP_PATH
+    - echo "Develop Stage Start Processing"
+    - sudo npm install -f
+    - sudo rm -rf client
+    - sudo git clone http://cody20v:nima1381@185.126.8.50/gymsoft/frontend --single-branch --branch develop frontend-app
+    - cd frontend-app
+    - sudo npm install -f
+    - sudo npm run build --configuration=develop
+    - cd ..
+    - sudo rm -rf frontend-app
+    - sudo mv gymsoft/client ./
+    - sudo rm -rf gymsoft
+    - sudo npm run build:dev
+    - pm2 reload $ECOSYSTEM_DEVELOP_NAME
+build_master:
+  stage: master
+  image: alpine
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+  script:
+    - sudo rm -rf $MASTER_PATH/*
+    - sudo cp -R ./* $MASTER_PATH
+    - cd $MASTER_PATH
+    - echo "Production Stage Start Processing"
+    - sudo npm install -f
+    - sudo rm -rf client
+    - sudo git clone http://cody20v:nima1381@185.126.8.50/gymsoft/frontend frontend-app
+    - cd frontend-app
+    - sudo npm install -f
+    - sudo npm run build --configuration=production
+    - cd ..
+    - sudo rm -rf frontend-app
+    - sudo mv gymsoft/client ./
+    - sudo rm -rf gymsoft
+    - sudo npm run build:prod
+    - pm2 reload $ECOSYSTEM_MASTER_NAME
